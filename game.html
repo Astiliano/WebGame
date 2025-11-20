@@ -1,0 +1,3275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Center Operations - Verdigris Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Color Palette - Slate & Emerald Theme */
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --accent-primary: #10b981;
+            /* Emerald 500 */
+            --accent-secondary: #3b82f6;
+            /* Blue 500 */
+            --accent-warning: #f59e0b;
+            /* Amber 500 */
+            --accent-danger: #ef4444;
+            /* Red 500 */
+            --accent-success: #10b981;
+            /* Emerald 500 */
+
+            --border-color: #334155;
+
+            /* Spacing & Layout */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+
+            /* Typography */
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --base-font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: var(--base-font-size);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.game-active {
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .start-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 2000;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .start-menu-content {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            border: none;
+            max-width: 1400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .start-menu-content h1 {
+            color: #00ff88;
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .start-menu-content h2 {
+            color: #ccc;
+            font-size: 1.3em;
+            margin-bottom: 50px;
+            font-weight: normal;
+        }
+
+        .instructions {
+            text-align: left;
+            margin-bottom: 50px;
+        }
+
+        .instructions h3 {
+            color: #00ff88;
+            font-size: 1.5em;
+            margin: 40px 0 30px 0;
+            text-align: center;
+        }
+
+        .instructions p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .instruction-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .instruction-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .instruction-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .instruction-item strong {
+            color: #ffaa00;
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid rgba(255, 170, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .instruction-item ul {
+            color: #ccc;
+            font-size: 1.05em;
+            line-height: 1.7;
+            padding-left: 20px;
+        }
+
+        .instruction-item li {
+            margin-bottom: 10px;
+        }
+
+        .verdigris-section {
+            background: rgba(0, 255, 136, 0.08);
+            padding: 35px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            margin: 40px 0;
+        }
+
+        .verdigris-section h3 {
+            color: #00ff88;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+        }
+
+        .verdigris-section p {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .verdigris-section ul {
+            text-align: left;
+            max-width: 700px;
+            margin: 20px auto;
+            padding-left: 20px;
+        }
+
+        .verdigris-section li {
+            margin-bottom: 12px;
+            color: #ccc;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .goal-section {
+            background: rgba(255, 170, 0, 0.08);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 170, 0, 0.3);
+            margin: 40px 0;
+        }
+
+        .goal-section h3 {
+            color: #ffaa00;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .goal-section p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            color: #000;
+            padding: 20px 50px;
+            border-radius: 12px;
+            font-size: 1.4em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(135deg, #00cc66, #00aa44);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .restart-btn {
+            background: rgba(255, 136, 0, 0.2);
+            border-color: #ff8800;
+        }
+
+        .restart-btn:hover {
+            background: rgba(255, 136, 0, 0.4);
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            min-height: 100vh;
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            overflow-y: auto;
+        }
+
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .timer {
+            font-size: 1.4em;
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .datacenter-area {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .power-distribution {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .power-row {
+            flex: 0 0 auto;
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            position: relative;
+            margin-bottom: 0px;
+            min-height: 240px;
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .row-power-meter {
+            width: 60%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .row-power-meter.visible {
+            opacity: 1;
+        }
+
+        .power-row:hover .row-power-meter:not(.visible) {
+            opacity: 0.7;
+        }
+
+        .row-power-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .racks-in-row {
+            display: grid;
+            /* grid-template-columns now set dynamically in JavaScript */
+            gap: 12px;
+            /* Increased from 8px */
+            height: calc(100% - 60px);
+            /* Adjusted for larger padding */
+            margin-top: 8px;
+            /* Added top margin */
+        }
+
+        .rack {
+            background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+            border-radius: 8px;
+            border: 2px solid #444;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 155px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rack.available {
+            border-color: #666;
+            background: linear-gradient(to bottom, #1a1a1a, #0a0a0a);
+        }
+
+        .rack.optimized {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .rack.overloaded {
+            border-color: #ff3030;
+            animation: danger-pulse 1.5s infinite;
+        }
+
+        .rack.stranded {
+            border-color: #ffaa00;
+            background: linear-gradient(to bottom, #3a3a00, #2a2a00);
+        }
+
+        .rack.failed {
+            border-color: #ff0080;
+            background: linear-gradient(to bottom, #3a0020, #2a0015);
+            opacity: 0.6;
+        }
+
+        .rack.warning {
+            border-color: #ff8800;
+            animation: warning-pulse 2s infinite;
+        }
+
+        @keyframes danger-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(255, 48, 48, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 48, 48, 0.8);
+            }
+        }
+
+        @keyframes warning-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(255, 136, 0, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 15px rgba(255, 136, 0, 0.7);
+            }
+        }
+
+        .rack-header {
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 2px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .workload-slots {
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+            height: auto;
+            min-height: 0;
+        }
+
+        .workload {
+            background: #4CAF50;
+            border-radius: 2px;
+            padding: 2px 4px;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .workload:hover::after {
+            content: "Right-click to remove";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .workload.workload-off {
+            opacity: 0.5;
+            background: #666 !important;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: 1px solid #666;
+            color: #00ff88;
+            padding: 1px 3px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            min-width: 12px;
+            height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .rack.breaker-tripped {
+            border-color: #ff0000;
+            background: linear-gradient(to bottom, #400000, #200000);
+            animation: breaker-trip 1s infinite;
+        }
+
+        .power-row.breaker-tripped {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        @keyframes breaker-trip {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 0, 0, 1.0);
+            }
+        }
+
+        .breaker-reset-btn {
+            background: rgba(255, 0, 0, 0.3);
+            border: 1px solid #ff0000;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+        .breaker-reset-btn:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+
+        .power-graph {
+            width: 100%;
+            height: 122px;
+            background: radial-gradient(ellipse at center, #0b2e33 0%, #091a24 100%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 4px;
+            margin-top: 5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 0 5px rgba(0, 255, 136, 0.1);
+        }
+
+        .power-graph canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .graph-legend {
+            font-size: 0.7rem;
+            color: #e0e0e0;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+
+        .workload-pattern-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .pattern-conflict-warning {
+            background: rgba(255, 136, 0, 0.2);
+            border: 1px solid #ff8800;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 0.75rem;
+            color: #ff8800;
+            margin: 2px 0;
+            text-align: center;
+        }
+
+        .workload-suggestion {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 0.75rem;
+            color: #00ff88;
+            margin: 2px 0;
+            text-align: center;
+        }
+
+        .workload:hover .pattern-preview {
+            display: block;
+        }
+
+        .pattern-preview {
+            display: none;
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            padding: 8px;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .pattern-preview canvas {
+            width: 180px;
+            height: 40px;
+        }
+
+        .power-cycle-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7rem;
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .workload.ai {
+            background: #FF9800;
+        }
+
+        .workload.database {
+            background: #2196F3;
+        }
+
+        .workload.web {
+            background: #9C27B0;
+        }
+
+        .workload.computing {
+            background: #4CAF50;
+        }
+
+        .workload:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .power-meter {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .power-meter.visible {
+            opacity: 1;
+        }
+
+        .rack:hover .power-meter:not(.visible) {
+            opacity: 0.7;
+        }
+
+        .power-meter::before {
+            content: "???";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .power-meter.visible::before {
+            display: none;
+        }
+
+        .power-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            font-size: 0.7em;
+            color: #ccc;
+            margin-top: 2px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 136, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .monitoring-system {
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            text-align: center;
+        }
+
+        .monitoring-system .action-btn {
+            width: 100%;
+            display: block;
+        }
+
+        .alerts {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff3030;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+
+        .alert {
+            margin-bottom: 3px;
+            padding: 2px;
+            background: rgba(255, 48, 48, 0.2);
+            border-radius: 2px;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #00ff88;
+            max-width: 500px;
+        }
+
+        .rack.optimal-placement {
+            background: #00ff88 !important;
+        }
+
+        .power-row.optimal-row {
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        @keyframes optimal-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(0, 255, 136, 1.0);
+            }
+        }
+
+        .auto-optimize-toggle {
+            background: rgba(0, 255, 136, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .drag-over {
+            background: rgba(0, 200, 255, 0.2) !important;
+            transform: scale(1.05);
+        }
+
+        .workload-pool {
+            margin-bottom: 12px;
+        }
+
+        .workload-pool h3 {
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #00ff88;
+        }
+
+        .pool-workloads {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 360px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .pool-workloads .workload {
+            max-width: calc(100% - 8px);
+            margin-right: 8px;
+        }
+
+        .profit-tracker {
+            font-size: 0.8125rem;
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .downtime-tracker {
+            font-size: 0.85rem;
+            color: #ff6666;
+            margin-bottom: 8px;
+        }
+
+        .repair-btn {
+            background: rgba(255, 136, 0, 0.3);
+            border: 1px solid #ff8800;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+        .repair-btn:hover {
+            background: rgba(255, 136, 0, 0.5);
+        }
+
+        .settings-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .settings-section h3 {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .setting-item {
+            margin-bottom: 12px;
+        }
+
+        .setting-label {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .setting-slider {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .setting-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+        }
+
+        .setting-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+        }
+
+        .setting-slider:hover::-webkit-slider-thumb {
+            background: #00ffaa;
+            box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+        }
+
+        .setting-slider:hover::-moz-range-thumb {
+            background: #00ffaa;
+            box-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+        }
+
+        .size-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .size-btn {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 4px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .size-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .size-btn.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-content">
+            <h1>🏢 Data Center Operations</h1>
+            <h2>Powered by <strong style="color: #00ff88;">Verdigris</strong> Electrical Intelligence</h2>
+
+            <div class="instructions">
+                <h3>🎯 Your Mission</h3>
+                <p>Manage a 15-rack data center for 5 minutes. Maximize profit while balancing power distribution,
+                    equipment reliability, and capacity constraints.</p>
+
+                <h3>🎮 How to Play</h3>
+                <div class="instruction-grid">
+                    <div class="instruction-item">
+                        <strong>💼 Basic Controls</strong>
+                        <ul>
+                            <li><strong>Drag & drop</strong> workloads from the pool into server racks</li>
+                            <li><strong>Right-click</strong> workloads in racks to remove them</li>
+                            <li><strong>Timer starts</strong> when you place your first workload</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <strong>⚡ Power Limits</strong>
+                        <ul>
+                            <li>Each rack: 5MW maximum capacity</li>
+                            <li>Each power row: 15MW maximum (supplies ~5 racks)</li>
+                            <li>Exceeding limits trips breakers, shutting down equipment</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <strong>💰 Economics</strong>
+                        <ul>
+                            <li>Workloads generate revenue per minute</li>
+                            <li>Power costs $3/MW per minute</li>
+                            <li>Failed racks lose revenue + $500 repair cost</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <strong>🚨 Equipment Failures</strong>
+                        <ul>
+                            <li>Racks fail randomly (higher power = higher risk)</li>
+                            <li>Without Verdigris: Failures are sudden and unexpected</li>
+                            <li>With Verdigris: 30-90 second warnings before failures</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="verdigris-section">
+                    <h3>🚀 The Verdigris Advantage ($15k Upgrade)</h3>
+                    <p><strong>Without Verdigris:</strong> Power consumption is hidden, failures happen without warning,
+                        and bottlenecks are invisible.</p>
+                    <p><strong>With Verdigris AI:</strong></p>
+                    <ul>
+                        <li>📊 <strong>Power visibility</strong> - See real-time consumption graphs for each rack and
+                            workload pattern</li>
+                        <li>⚠️ <strong>Predictive maintenance</strong> - Get 30-90 second warnings before failures (use
+                            button to prevent them)</li>
+                        <li>🔍 <strong>Stranded capacity finder</strong> - Discover racks with hidden bottlenecks
+                            preventing full utilization</li>
+                        <li>⚡ <strong>Auto-optimizer helper</strong> - Highlights safest rack placements based on power
+                            pattern analysis</li>
+                    </ul>
+                </div>
+
+                <div class="goal-section">
+                    <h3>🏆 Goal</h3>
+                    <p>Maximize profit in 5 minutes while minimizing downtime. Target: $30,000+ profit!</p>
+                    <p><strong>Strategy tip:</strong> Upgrade to Verdigris early - the visibility and failure prevention
+                        pays for itself quickly.</p>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGameFromMenu()">🚀 Start Data Center Operations</button>
+        </div>
+    </div>
+
+    <div class="game-container hidden" id="gameContainer">
+        <!-- Left Sidebar - Controls & Stats -->
+        <div class="sidebar">
+            <div
+                style="font-size: 0.8rem; color: #ccc; text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(0, 255, 136, 0.2);">
+                Manage power distribution & failures<br>
+                <strong style="color: #00ff88;">Verdigris</strong> electrical intelligence
+            </div>
+
+            <div style="font-size: 0.75rem; color: #888; text-align: center; margin-bottom: 10px; padding: 6px; background: rgba(0, 255, 136, 0.05); border-radius: 4px; border: 1px solid rgba(0, 255, 136, 0.1);"
+                id="graphInfo">
+                📊 Power Trend: 10 cycles - Aggregate Only
+            </div>
+
+            <div class="profit-tracker">
+                💰 Total Profit: $<span id="totalProfit">0</span>
+            </div>
+
+            <div class="downtime-tracker">
+                ⏱️ Total Downtime: <span id="totalDowntime">0</span>s
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="revenue">$0</div>
+                    <div class="stat-label">Revenue/min</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="powerCost">$0</div>
+                    <div class="stat-label">Power Cost/min</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="efficiency">0%</div>
+                    <div class="stat-label">Efficiency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="strandedCapacity">0</div>
+                    <div class="stat-label"
+                        title="Installed infrastructure that can't be used due to bottlenecks (power available but no cooling, etc). Costs money but generates no revenue.">
+                        Stranded MW ❓</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="failedRacks">0</div>
+                    <div class="stat-label">Failed Racks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uptime">100%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+
+            <div class="monitoring-system">
+                <h3 style="font-size: 0.85rem; margin-bottom: 6px; color: #00ff88;">Upgrades</h3>
+                <div style="font-size: 0.75rem; margin-bottom: 6px; color: #ccc;" id="rackCapacityLevel">Rack Capacity:
+                    5.0 MW</div>
+                <button class="action-btn" id="upgradeRackCapacity" onclick="upgradeRackCapacity()">
+                    ⚡ Increase Rack Capacity<br><small>$5k - +0.25 MW per rack</small>
+                </button>
+                <div style="font-size: 0.75rem; margin-bottom: 6px; margin-top: 10px; color: #ccc;"
+                    id="rowCapacityLevel">Row Capacity: 15.0 MW</div>
+                <button class="action-btn" id="upgradeRowCapacity" onclick="upgradeRowCapacity()">
+                    ⚡ Increase Row Capacity<br><small>$5k - +1.5 MW per row</small>
+                </button>
+            </div>
+
+            <div class="monitoring-system">
+                <h3 style="font-size: 0.85rem; margin-bottom: 6px; color: #00ff88;">Monitoring System</h3>
+                <div style="font-size: 0.8rem; margin-bottom: 6px;" id="monitoringType">Basic Monitoring</div>
+                <button class="action-btn" id="upgradeMonitoring" onclick="upgradeMonitoring()">
+                    Upgrade to Verdigris AI<br><small>$15k - Predictive Analytics</small>
+                </button>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn" onclick="discoverStrandedCapacity()" id="discoverBtn" disabled
+                    title="Find racks with hidden bottlenecks preventing full utilization">
+                    🔍 Discover Stranded Capacity<br><small>Find unusable infrastructure</small>
+                </button>
+                <button class="action-btn" onclick="predictiveMaintenance()" id="predictiveBtn" disabled>
+                    🔮 Predictive Maintenance<br><small>Prevent failures 21 days ahead</small>
+                </button>
+                <button class="action-btn" onclick="toggleAutoOptimize()" id="autoOptimizeBtn" disabled>
+                    ⚡ Auto-Optimize Helper<br><small>Show pattern-safe placements</small>
+                </button>
+                <button class="action-btn restart-btn" onclick="returnToMenu()">
+                    🔄 Restart Game<br><small>Return to main menu</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Area -->
+        <div class="main-area">
+            <div class="header">
+                <h1>🏢 Data Center Operations</h1>
+                <div class="timer">⏱️ Time: <span id="gameTimer">5:00</span></div>
+            </div>
+
+            <div class="datacenter-area">
+                <div class="power-distribution" id="powerDistribution">
+                    <!-- Power rows will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Alerts & Info -->
+        <div class="sidebar">
+            <div class="settings-section">
+                <h3>⚙️ Settings</h3>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Text Size</span>
+                    </div>
+                    <div class="size-buttons">
+                        <button class="size-btn" data-size="16">Small</button>
+                        <button class="size-btn" data-size="20">Medium</button>
+                        <button class="size-btn active" data-size="24">Large</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Workload Size</span>
+                        <span class="setting-value" id="workloadSizeValue">155px</span>
+                    </div>
+                    <input type="range" class="setting-slider" id="workloadSizeSlider" min="120" max="200" value="155"
+                        step="5">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Graph Height</span>
+                        <span class="setting-value" id="graphSizeValue">122px</span>
+                    </div>
+                    <input type="range" class="setting-slider" id="graphSizeSlider" min="80" max="180" value="122"
+                        step="5">
+                </div>
+            </div>
+
+            <div class="alerts" id="alertsPanel">
+                <strong>System Alerts:</strong><br>
+                <div class="alert">🟢 All systems operational</div>
+            </div>
+
+            <div class="workload-pool">
+                <h3>Available Workloads</h3>
+                <div class="pool-workloads" id="workloadPool">
+                    <!-- Workloads will be generated here -->
+                </div>
+            </div>
+
+            <div style="font-size: 0.75rem; line-height: 1.3; color: #ccc;">
+                <h3 style="color: #00ff88; margin-bottom: 6px;">Quick Guide:</h3>
+                • <strong>Drag & drop</strong> workloads from pool to racks<br>
+                • <strong>Right-click</strong> to remove workloads from racks<br>
+                • <strong>Timer starts</strong> when you place first workload<br>
+                • Each rack: 5MW max, Each row: 15MW max<br>
+                • Upgrade to Verdigris for power visibility & warnings<br><br>
+
+                <strong style="color: #ffaa00;">Workload Economics:</strong><br>
+                • AI Training: $1000/min revenue, 2MW power<br>
+                • Database: $600-900/min, 1.2-1.8MW<br>
+                • Web Service: $750/min, 1.5MW<br>
+                • Computing: $500/min, 1MW<br>
+                • Power cost: $3/MW/min<br><br>
+
+                <strong style="color: #ff3030;">Key Challenges:</strong><br>
+                • Power patterns fluctuate 0-100% each second (10-cycle loop)<br>
+                • Pattern spikes can trip breakers (causes revenue loss)<br>
+                • Racks fail randomly (higher power = more failures)<br>
+                • <strong>Without Verdigris:</strong> No power graphs, sudden failures<br>
+                • <strong>With Verdigris:</strong> See patterns, get 30-90s warnings, use Auto-Optimizer to find safe
+                placements
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="game-over hidden" id="gameOverScreen">
+        <div class="game-over-content">
+            <h2>🎯 Game Complete!</h2>
+            <p style="margin: 15px 0;">Your data center's performance:</p>
+            <div style="font-size: 1.125rem; margin: 10px 0;">
+                💰 <strong>Total Profit: $<span id="finalProfit">0</span></strong>
+            </div>
+            <div style="font-size: 0.875rem; margin: 15px 0;" id="gameResults"></div>
+            <button class="action-btn" onclick="restartGame()" style="margin-top: 20px; padding: 12px 24px;">
+                🔄 Return to Main Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class DataCenterGame {
+            constructor() {
+                this.gameTime = 300; // 5 minutes in seconds
+                this.totalProfit = 0;
+                this.revenue = 0;
+                this.powerCost = 0;
+                this.efficiency = 60;
+                this.strandedCapacity = 0;
+                this.totalDowntime = 0;
+                this.hasVerdigris = false;
+                this.rackCapacityUpgrades = 0; // Track number of rack capacity upgrades purchased
+                this.rowCapacityUpgrades = 0; // Track number of row capacity upgrades purchased
+                this.gameRunning = true;
+                this.timerStarted = false; // Timer doesn't start until first workload is placed
+                this.alerts = [];
+                this.autoOptimizeActive = false; // Reset auto-optimize helper state
+                this.draggedWorkloadType = null; // Track which workload type is being dragged
+                this.draggedFromRackId = null; // Track source rack ID to avoid double-counting
+                this.draggedFromIndex = null; // Track source index in rack
+
+                // New power cycle system
+                this.powerCycle = 0; // Current cycle (0-9)
+                this.cycleHistory = []; // Store last 10 cycles of power data for graphing
+
+                this.powerRows = [];
+                this.racks = [];
+                this.workloadTypes = [
+                    // AI Training - Wild fluctuations, reduced to max 2.5MW
+                    {
+                        type: 'ai',
+                        name: 'AI-Training-A',
+                        revenue: 1000,
+                        basePower: 2.0,
+                        color: '#FF9800',
+                        powerPattern: [2.5, 2.3, 2.4, 2.1, 1.8, 1.5, 2.0, 2.2, 2.5, 1.9], // Wild spikes up to 2.5MW
+                        startupPower: 2.8 // Reduced startup power
+                    },
+                    {
+                        type: 'ai',
+                        name: 'AI-Training-B',
+                        revenue: 1000,
+                        basePower: 2.0,
+                        color: '#FF9800',
+                        powerPattern: [1.6, 2.4, 1.9, 2.5, 2.2, 1.7, 2.3, 1.8, 2.5, 2.0], // Different wild pattern up to 2.5MW
+                        startupPower: 2.9
+                    },
+                    {
+                        type: 'ai',
+                        name: 'AI-Training-C',
+                        revenue: 1000,
+                        basePower: 2.0,
+                        color: '#FF9800',
+                        powerPattern: [2.1, 1.7, 2.4, 1.5, 2.5, 2.2, 1.6, 2.3, 1.4, 2.4], // Another wild pattern up to 2.5MW
+                        startupPower: 2.7
+                    },
+
+                    // Databases - Various usage patterns, reduced to max 2MW
+                    {
+                        type: 'database',
+                        name: 'Database-1',
+                        revenue: 900,
+                        basePower: 1.8,
+                        color: '#2196F3',
+                        powerPattern: [1.9, 2.0, 1.8, 1.9, 2.0, 1.9, 1.8, 2.0, 1.9, 1.9], // Consistently high up to 2MW
+                        startupPower: 2.2
+                    },
+                    {
+                        type: 'database',
+                        name: 'Database-2',
+                        revenue: 750,
+                        basePower: 1.5,
+                        color: '#2196F3',
+                        powerPattern: [1.0, 1.3, 1.6, 1.9, 2.0, 1.7, 1.4, 1.5, 1.8, 1.9], // Low to high ramp up to 2MW
+                        startupPower: 2.1
+                    },
+                    {
+                        type: 'database',
+                        name: 'Database-3',
+                        revenue: 600,
+                        basePower: 1.2,
+                        color: '#2196F3',
+                        powerPattern: [1.1, 1.3, 1.2, 1.4, 1.2, 1.3, 1.1, 1.4, 1.2, 1.3], // Consistently low
+                        startupPower: 1.8
+                    },
+                    {
+                        type: 'database',
+                        name: 'Database-4',
+                        revenue: 750,
+                        basePower: 1.5,
+                        color: '#2196F3',
+                        powerPattern: [1.0, 2.0, 1.1, 1.9, 1.2, 1.8, 1.1, 2.0, 1.0, 1.9], // Alternating spikes up to 2MW
+                        startupPower: 2.3
+                    },
+
+                    // Web Services - Different traffic patterns
+                    {
+                        type: 'web',
+                        name: 'Web-Service-A',
+                        revenue: 750,
+                        basePower: 1.5,
+                        color: '#9C27B0',
+                        powerPattern: [1.8, 1.6, 1.2, 1.0, 1.2, 1.5, 1.7, 1.3, 1.1, 1.4], // Standard web traffic
+                        startupPower: 2.2
+                    },
+                    {
+                        type: 'web',
+                        name: 'Web-Service-B',
+                        revenue: 750,
+                        basePower: 1.5,
+                        color: '#9C27B0',
+                        powerPattern: [0.8, 0.9, 0.8, 1.9, 2.1, 2.0, 1.8, 0.9, 0.8, 0.9], // Peak hours burst
+                        startupPower: 2.1
+                    },
+                    {
+                        type: 'web',
+                        name: 'Web-Service-C',
+                        revenue: 750,
+                        basePower: 1.5,
+                        color: '#9C27B0',
+                        powerPattern: [2.0, 1.8, 1.2, 0.8, 0.9, 1.1, 1.4, 1.6, 1.8, 1.9], // Inverse pattern
+                        startupPower: 2.3
+                    },
+
+                    // Computing - Various computational loads
+                    {
+                        type: 'computing',
+                        name: 'Compute-1',
+                        revenue: 500,
+                        basePower: 1.0,
+                        color: '#4CAF50',
+                        powerPattern: [1.0, 1.0, 1.1, 1.0, 1.0, 1.1, 1.0, 1.0, 1.1, 1.0], // Very steady
+                        startupPower: 1.5
+                    },
+                    {
+                        type: 'computing',
+                        name: 'Compute-2',
+                        revenue: 500,
+                        basePower: 1.0,
+                        color: '#4CAF50',
+                        powerPattern: [0.5, 0.6, 1.8, 1.9, 1.8, 0.6, 0.5, 0.6, 1.7, 1.8], // Batch processing
+                        startupPower: 1.4
+                    },
+                    {
+                        type: 'computing',
+                        name: 'Compute-3',
+                        revenue: 500,
+                        basePower: 1.0,
+                        color: '#4CAF50',
+                        powerPattern: [0.8, 1.2, 1.1, 0.9, 1.3, 1.0, 0.7, 1.4, 1.2, 0.8], // Variable load
+                        startupPower: 1.6
+                    }
+                ];
+                this.workloadPool = [];
+
+                this.initializeGame();
+                this.setupDragAndDrop();
+                this.startGameLoop();
+            }
+
+            initializeGame() {
+                console.log('Initializing realistic data center...');
+
+                // Create 3 power distribution rows with 5 racks each (15 total)
+                const powerDistribution = document.getElementById('powerDistribution');
+                powerDistribution.innerHTML = '';
+
+                const rowConfigs = [5, 5, 5]; // Racks per row - MUST total 15
+
+                for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+                    const powerRow = {
+                        id: rowIndex,
+                        maxPower: 15.0, // Fixed 15MW per row (independent of rack capacity)
+                        currentPower: 0,
+                        isOverloaded: false,
+                        racks: [],
+                        // New breaker and cycle tracking
+                        breakerTripped: false,
+                        powerHistory: new Array(10).fill(0), // 10-cycle history
+                        lastTripCycle: -1
+                    };
+
+                    // Create racks for this row
+                    for (let rackIndex = 0; rackIndex < rowConfigs[rowIndex]; rackIndex++) {
+                        const globalRackId = this.racks.length;
+                        const rack = {
+                            id: globalRackId,
+                            rowId: rowIndex,
+                            positionInRow: rackIndex,
+                            basePower: 0,
+                            currentPower: 0,
+                            workloads: [],
+                            status: 'available', // available, optimized, overloaded, warning, failed
+                            isFailed: false,
+                            downtime: 0,
+                            maintenanceNeeded: false,
+                            failureWarning: 0, // Time until failure (if Verdigris predicts)
+                            lastFailureCheck: 0,
+                            isStranded: Math.random() < 0.3, // 30% chance of stranded capacity
+                            powerFluctuation: 1.0, // Power multiplier for fluctuations
+                            // New breaker and power management
+                            breakerTripped: false,
+                            lastPowerExceedance: 0
+                        };
+
+                        this.racks.push(rack);
+                        powerRow.racks.push(rack);
+                    }
+
+                    this.powerRows.push(powerRow);
+                    this.createPowerRowElement(powerRow);
+                }
+
+                // Generate initial workloads
+                this.generateWorkloads();
+                this.updateUI();
+                console.log('Initialized 15 racks in 3 power distribution rows');
+            }
+
+            createPowerRowElement(powerRow) {
+                const powerDistribution = document.getElementById('powerDistribution');
+                const rowElement = document.createElement('div');
+                rowElement.className = 'power-row';
+                rowElement.id = `row-${powerRow.id}`;
+
+                // Dynamic grid columns based on actual rack count
+                const rackCount = powerRow.racks.length;
+
+                rowElement.innerHTML = `
+                    <div class="row-header">
+                        <span>Row ${powerRow.id + 1} - Power Distribution</span>
+                        <div class="row-power-meter ${this.hasVerdigris ? 'visible' : ''}" id="row-meter-${powerRow.id}">
+                            <div class="row-power-fill" id="row-power-${powerRow.id}"></div>
+                        </div>
+                        <span id="row-power-text-${powerRow.id}">${this.hasVerdigris ? '0/15 MW' : '???'}</span>
+                    </div>
+                    <div class="graph-container">
+                        <div class="power-graph">
+                            <canvas id="graph-${powerRow.id}" width="300" height="180"></canvas>
+                            ${this.hasVerdigris ? `<div class="workload-pattern-overlay" id="overlay-${powerRow.id}"></div>` : ''}
+                        </div>
+                    </div>
+                    <div class="racks-in-row" id="racks-row-${powerRow.id}" style="grid-template-columns: repeat(${rackCount}, 1fr);">
+                        <!-- Racks will be added here -->
+                    </div>
+                `;
+
+                powerDistribution.appendChild(rowElement);
+
+                // Create rack elements for this row
+                const racksContainer = document.getElementById(`racks-row-${powerRow.id}`);
+                powerRow.racks.forEach(rack => {
+                    this.createRackElement(rack, racksContainer);
+                });
+
+                this.updatePowerRowVisual(powerRow);
+            }
+
+            createRackElement(rack, container) {
+                const rackElement = document.createElement('div');
+                rackElement.className = `rack ${rack.status}`;
+                rackElement.id = `rack-${rack.id}`;
+
+                rackElement.innerHTML = `
+                    <div class="rack-header">R${rack.id + 1}</div>
+                    <div class="workload-slots" id="slots-${rack.id}"></div>
+                    <div class="power-meter ${this.hasVerdigris ? 'visible' : ''}" id="meter-${rack.id}">
+                        <div class="power-fill" id="power-${rack.id}"></div>
+                    </div>
+                `;
+
+                container.appendChild(rackElement);
+                this.updateRackVisual(rack);
+            }
+
+            resetRowBreaker(rowId) {
+                const row = this.powerRows[rowId];
+
+                // Calculate total startup power for all "on" workloads in row
+                let totalStartupPower = 0;
+                row.racks.forEach(rack => {
+                    rack.workloads.forEach(workload => {
+                        if (workload.isOn) {
+                            totalStartupPower += workload.startupPower;
+                        }
+                    });
+                });
+
+                if (totalStartupPower > row.maxPower) {
+                    this.addAlert(`❌ Cannot reset: Row startup power ${totalStartupPower.toFixed(1)}MW exceeds limit ${row.maxPower}MW`);
+                    return;
+                }
+
+                row.breakerTripped = false;
+                // Reset all rack breakers and startup cycles
+                row.racks.forEach(rack => {
+                    rack.breakerTripped = false;
+                    rack.workloads.forEach(workload => {
+                        if (workload.isOn) {
+                            workload.startupCycle = this.powerCycle;
+                            workload.cyclesSinceStartup = 0;
+                        }
+                    });
+                    this.updateRackPower(rack);
+                    this.updateRackVisual(rack);
+                });
+
+                this.addAlert(`✅ Row ${rowId + 1} breaker reset successfully`);
+                this.updatePowerRowVisual(row);
+            }
+
+            updatePowerRowVisual(powerRow) {
+                const rowPowerFill = document.getElementById(`row-power-${powerRow.id}`);
+                const rowPowerText = document.getElementById(`row-power-text-${powerRow.id}`);
+                const rowElement = document.getElementById(`row-${powerRow.id}`);
+
+                if (!rowPowerFill || !rowPowerText || !rowElement) return;
+
+                // Calculate row power usage
+                powerRow.currentPower = powerRow.racks.reduce((total, rack) => total + rack.currentPower, 0);
+
+                // Store power history for graphing
+                powerRow.powerHistory[this.powerCycle] = powerRow.currentPower;
+
+                const powerPercent = (powerRow.currentPower / powerRow.maxPower) * 100;
+                rowPowerFill.style.width = `${Math.min(100, powerPercent)}%`;
+
+                if (this.hasVerdigris || powerRow.breakerTripped) {
+                    rowPowerText.textContent = `${powerRow.currentPower.toFixed(1)}/${powerRow.maxPower} MW`;
+                } else {
+                    rowPowerText.textContent = '???';
+                }
+
+                // Update row status and add breaker reset if needed
+                let headerContent = `Row ${powerRow.id + 1} - Power Distribution`;
+                if (powerRow.breakerTripped) {
+                    headerContent += ` <button class="breaker-reset-btn" onclick="game.resetRowBreaker(${powerRow.id})">Reset Row Breaker</button>`;
+                    rowElement.className = 'power-row breaker-tripped';
+                    rowPowerFill.style.backgroundColor = '#ff3030';
+                } else if (powerRow.currentPower > powerRow.maxPower) {
+                    rowElement.style.borderColor = '#ff3030';
+                    powerRow.isOverloaded = true;
+                    rowPowerFill.style.backgroundColor = '#ff3030';
+                } else if (powerRow.currentPower > powerRow.maxPower * 0.9) {
+                    rowElement.style.borderColor = '#ffaa00';
+                    powerRow.isOverloaded = false;
+                    rowPowerFill.style.backgroundColor = '#ffaa00';
+                } else {
+                    rowElement.style.borderColor = '#00ff88';
+                    powerRow.isOverloaded = false;
+                    rowPowerFill.style.backgroundColor = '#00ff88';
+                }
+
+                // Update header with any breaker controls
+                const rowHeader = rowElement.querySelector('.row-header span');
+                if (rowHeader) {
+                    rowHeader.innerHTML = headerContent;
+                }
+
+                // Draw power trend graph
+                this.drawPowerGraph(powerRow.id);
+            }
+
+            repairRack(rackId) {
+                const rack = this.racks[rackId];
+                if (rack.isFailed && this.totalProfit >= 500) {
+                    this.totalProfit -= 500;
+                    rack.isFailed = false;
+                    rack.downtime = 0;
+                    rack.failureWarning = 0;
+                    this.addAlert(`🔧 Repaired Rack ${rackId + 1} for $500`);
+                    this.updateRackVisual(rack);
+                }
+            }
+
+            updateRackVisual(rack) {
+                const rackElement = document.getElementById(`rack-${rack.id}`);
+                const powerFill = document.getElementById(`power-${rack.id}`);
+                const slotsContainer = document.getElementById(`slots-${rack.id}`);
+
+                if (!rackElement || !powerFill || !slotsContainer) return;
+
+                // Update rack status based on condition
+                let status = 'available';
+                if (rack.isFailed) {
+                    status = 'failed';
+                } else if (rack.breakerTripped) {
+                    status = 'breaker-tripped';
+                } else if (rack.failureWarning > 0 && this.hasVerdigris) {
+                    status = 'warning';
+                } else if (rack.workloads.length > 0) {
+                    const powerRow = this.powerRows[rack.rowId];
+                    if (powerRow.isOverloaded || powerRow.breakerTripped) {
+                        status = 'overloaded';
+                    } else if (rack.currentPower > 3.0) {
+                        status = 'overloaded';
+                    } else {
+                        status = 'optimized';
+                    }
+                } else if (rack.isStranded && this.hasVerdigris) {
+                    status = 'stranded';
+                }
+
+                rackElement.className = `rack ${status}`;
+
+                // Update power meter
+                const maxRackPower = this.getRackMaxPower();
+                const powerPercent = (rack.currentPower / maxRackPower) * 100;
+                powerFill.style.width = `${Math.min(100, powerPercent)}%`;
+
+                if (rack.isFailed || rack.breakerTripped) {
+                    powerFill.style.backgroundColor = '#ff0080';
+                } else if (powerPercent > 75) {
+                    powerFill.style.backgroundColor = '#ff3030';
+                } else if (powerPercent > 50) {
+                    powerFill.style.backgroundColor = '#ffaa00';
+                } else {
+                    powerFill.style.backgroundColor = '#00ff88';
+                }
+
+                // Update workload slots
+                slotsContainer.innerHTML = '';
+
+                // Add rack power usage indicator (only visible with Verdigris)
+                if (this.hasVerdigris) {
+                    const powerIndicator = document.createElement('div');
+                    powerIndicator.className = 'power-cycle-indicator';
+                    powerIndicator.textContent = `${rack.currentPower.toFixed(1)} MW`;
+                    slotsContainer.appendChild(powerIndicator);
+                }
+
+                if (rack.isFailed) {
+                    // Show repair button for failed racks
+                    const repairBtn = document.createElement('button');
+                    repairBtn.className = 'repair-btn';
+                    repairBtn.textContent = 'Repair $500';
+                    repairBtn.onclick = () => this.repairRack(rack.id);
+                    slotsContainer.appendChild(repairBtn);
+                } else if (rack.breakerTripped) {
+                    // Show breaker reset button
+                    const resetBtn = document.createElement('button');
+                    resetBtn.className = 'breaker-reset-btn';
+                    resetBtn.textContent = 'Reset Breaker';
+                    resetBtn.onclick = () => this.resetRackBreaker(rack.id);
+                    slotsContainer.appendChild(resetBtn);
+                } else {
+                    // Show workloads with on/off controls
+                    rack.workloads.forEach((workload, index) => {
+                        const workloadContainer = document.createElement('div');
+                        workloadContainer.style.display = 'flex';
+                        workloadContainer.style.alignItems = 'center';
+                        workloadContainer.style.flex = '1';
+                        workloadContainer.style.gap = '2px';
+
+                        const workloadElement = document.createElement('div');
+                        workloadElement.className = `workload ${workload.type} ${workload.isOn ? '' : 'workload-off'}`;
+                        workloadElement.textContent = workload.name;
+                        workloadElement.draggable = true;
+                        workloadElement.dataset.workloadId = `${rack.id}-${index}`;
+                        workloadElement.style.flex = '1';
+                        workloadElement.style.position = 'relative';
+
+                        // Add pattern preview for Verdigris users
+                        if (this.hasVerdigris) {
+                            const patternPreview = document.createElement('div');
+                            patternPreview.className = 'pattern-preview';
+                            patternPreview.innerHTML = `
+                                <div style="font-size: 0.8rem; margin-bottom: 4px;">${workload.name} Power Pattern</div>
+                                <canvas width="180" height="40"></canvas>
+                            `;
+                            workloadElement.appendChild(patternPreview);
+
+                            // Draw mini pattern graph (scaled to current rack capacity)
+                            const miniCanvas = patternPreview.querySelector('canvas');
+                            const miniCtx = miniCanvas.getContext('2d');
+                            const rackMax = this.getRackMaxPower();
+                            miniCtx.strokeStyle = workload.color;
+                            miniCtx.lineWidth = 2;
+                            miniCtx.beginPath();
+                            for (let i = 0; i < 10; i++) {
+                                const x = (i / 9) * 180;
+                                const y = 40 - (workload.powerPattern[i] / rackMax) * 40;
+                                if (i === 0) miniCtx.moveTo(x, y);
+                                else miniCtx.lineTo(x, y);
+                            }
+                            miniCtx.stroke();
+                        }
+
+                        const toggleBtn = document.createElement('button');
+                        toggleBtn.className = 'toggle-btn';
+                        toggleBtn.textContent = workload.isOn ? '●' : '○';
+                        toggleBtn.title = workload.isOn ? 'Turn Off' : 'Turn On';
+                        toggleBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            this.toggleWorkload(rack.id, index);
+                        };
+
+                        workloadContainer.appendChild(workloadElement);
+                        workloadContainer.appendChild(toggleBtn);
+                        slotsContainer.appendChild(workloadContainer);
+                    });
+
+                    // Add conflict warnings and suggestions for Verdigris users
+                    if (this.hasVerdigris && rack.workloads.length > 1) {
+                        const conflicts = this.detectPatternConflicts(rack);
+                        if (conflicts.length > 0) {
+                            const warningDiv = document.createElement('div');
+                            warningDiv.className = 'pattern-conflict-warning';
+                            warningDiv.textContent = `⚠️ Power conflicts at cycles: ${conflicts.map(c => c.cycle).join(', ')}`;
+                            slotsContainer.appendChild(warningDiv);
+                        }
+
+                        // Show pairing suggestions for the first workload
+                        if (rack.workloads.length === 1) {
+                            const suggestions = this.suggestOptimalPairings(rack.workloads[0]);
+                            if (suggestions.length > 0) {
+                                const suggestionDiv = document.createElement('div');
+                                suggestionDiv.className = 'workload-suggestion';
+                                suggestionDiv.textContent = `💡 Pairs well with: ${suggestions[0].workload}`;
+                                slotsContainer.appendChild(suggestionDiv);
+                            }
+                        }
+                    }
+                }
+            }
+
+            generateWorkloads() {
+                console.log('Generating workloads...');
+                this.workloadPool = [];
+
+                // Generate workloads
+                for (let i = 0; i < 25; i++) {
+                    const workloadType = this.workloadTypes[Math.floor(Math.random() * this.workloadTypes.length)];
+                    const workload = {
+                        id: `pool-${i}`,
+                        ...workloadType
+                    };
+                    this.workloadPool.push(workload);
+                }
+
+                this.updateWorkloadPool();
+                console.log('Generated', this.workloadPool.length, 'workloads');
+            }
+
+            updateWorkloadPool() {
+                const pool = document.getElementById('workloadPool');
+                if (!pool) return;
+
+                pool.innerHTML = '';
+
+                this.workloadPool.forEach(workload => {
+                    const workloadElement = document.createElement('div');
+                    workloadElement.className = `workload ${workload.type}`;
+                    workloadElement.textContent = workload.name;
+                    workloadElement.draggable = true;
+                    workloadElement.dataset.workloadId = workload.id;
+                    workloadElement.style.position = 'relative';
+
+                    // Add pattern preview for Verdigris users
+                    if (this.hasVerdigris) {
+                        const patternPreview = document.createElement('div');
+                        patternPreview.className = 'pattern-preview';
+                        patternPreview.innerHTML = `
+                            <div style="font-size: 0.8rem; margin-bottom: 4px;">${workload.name} Power Pattern</div>
+                            <canvas width="180" height="40"></canvas>
+                        `;
+                        workloadElement.appendChild(patternPreview);
+
+                        // Draw mini pattern graph (scaled to current rack capacity)
+                        const miniCanvas = patternPreview.querySelector('canvas');
+                        const miniCtx = miniCanvas.getContext('2d');
+                        const rackMax = this.getRackMaxPower();
+                        miniCtx.strokeStyle = workload.color;
+                        miniCtx.lineWidth = 2;
+                        miniCtx.beginPath();
+                        for (let i = 0; i < 10; i++) {
+                            const x = (i / 9) * 180;
+                            const y = 40 - (workload.powerPattern[i] / rackMax) * 40;
+                            if (i === 0) miniCtx.moveTo(x, y);
+                            else miniCtx.lineTo(x, y);
+                        }
+                        miniCtx.stroke();
+                    }
+
+                    pool.appendChild(workloadElement);
+                });
+            }
+
+            setupDragAndDrop() {
+                console.log('Setting up drag and drop...');
+
+                document.addEventListener('dragstart', (e) => {
+                    console.log('🔷 DRAGSTART EVENT:', e.target, e.target?.classList, e.target?.classList?.contains('workload'));
+                    if (!e.target || !e.target.classList) return;
+                    if (e.target.classList.contains('workload')) {
+                        console.log('🔷 IS WORKLOAD, proceeding...');
+                        e.dataTransfer.setData('text/plain', e.target.dataset.workloadId);
+                        e.target.style.opacity = '0.5';
+
+                        // Store the workload type being dragged for Auto-Optimizer
+                        const workloadId = e.target.dataset.workloadId;
+                        if (workloadId.startsWith('pool-')) {
+                            // From workload pool
+                            const workload = this.workloadPool.find(w => w.id === workloadId);
+                            if (workload) {
+                                this.draggedWorkloadType = workload;
+                                this.draggedFromRackId = null;
+                                this.draggedFromIndex = null;
+                                console.log('🔵 Dragging from pool:', this.draggedWorkloadType.name, 'autoOptimize:', this.autoOptimizeActive);
+                            }
+                        } else if (workloadId.includes('-')) {
+                            // From a rack
+                            const [rackId, index] = workloadId.split('-').map(Number);
+                            const rack = this.racks.find(r => r.id === rackId);
+                            if (rack && rack.workloads[index]) {
+                                this.draggedWorkloadType = rack.workloads[index];
+                                this.draggedFromRackId = rackId;
+                                this.draggedFromIndex = index;
+                                console.log('🔵 Dragging from rack:', this.draggedWorkloadType.name, 'autoOptimize:', this.autoOptimizeActive);
+                            }
+                        }
+                    }
+                });
+
+                document.addEventListener('dragend', (e) => {
+                    if (!e.target || !e.target.classList) return;
+                    if (e.target.classList.contains('workload')) {
+                        e.target.style.opacity = '1';
+                        this.draggedWorkloadType = null;
+                        this.draggedFromRackId = null;
+                        this.draggedFromIndex = null;
+                        this.clearOptimalHighlights();
+                    }
+                });
+
+                // Add right-click removal for workloads in racks
+                document.addEventListener('contextmenu', (e) => {
+                    if (e.target.classList.contains('workload') && e.target.dataset.workloadId.includes('-')) {
+                        e.preventDefault();
+                        this.returnWorkloadToPool(e.target.dataset.workloadId);
+                    }
+                });
+
+                // Setup drop zones (racks)
+                this.racks.forEach(rack => {
+                    const rackElement = document.getElementById(`rack-${rack.id}`);
+
+                    rackElement.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (!rack.isFailed) {
+                            rackElement.classList.add('drag-over');
+                            if (this.autoOptimizeActive) {
+                                console.log('🟢 Calling highlightOptimalPlacements, draggedType:', this.draggedWorkloadType?.name);
+                                this.highlightOptimalPlacements();
+                            }
+                        }
+                    });
+
+                    rackElement.addEventListener('dragleave', () => {
+                        rackElement.classList.remove('drag-over');
+                    });
+
+                    rackElement.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        rackElement.classList.remove('drag-over');
+
+                        if (!rack.isFailed) {
+                            const workloadId = e.dataTransfer.getData('text/plain');
+                            this.moveWorkload(workloadId, rack.id);
+                        }
+                    });
+                });
+
+                // Setup workload pool as drop zone
+                const pool = document.getElementById('workloadPool');
+                pool.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                pool.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const workloadId = e.dataTransfer.getData('text/plain');
+                    this.returnWorkloadToPool(workloadId);
+                });
+            }
+
+            moveWorkload(workloadId, targetRackId) {
+                let workload = null;
+                let sourceRack = null;
+
+                // Find workload in pool
+                const poolIndex = this.workloadPool.findIndex(w => w.id === workloadId);
+                if (poolIndex !== -1) {
+                    workload = this.workloadPool[poolIndex];
+                    this.workloadPool.splice(poolIndex, 1);
+                } else {
+                    // Find workload in racks
+                    for (let rack of this.racks) {
+                        const workloadIndex = rack.workloads.findIndex((_, index) => `${rack.id}-${index}` === workloadId);
+                        if (workloadIndex !== -1) {
+                            workload = rack.workloads[workloadIndex];
+                            rack.workloads.splice(workloadIndex, 1);
+                            this.updateRackPower(rack);
+                            sourceRack = rack;
+                            break;
+                        }
+                    }
+                }
+
+                if (workload) {
+                    const targetRack = this.racks[targetRackId];
+                    const targetRow = this.powerRows[targetRack.rowId];
+
+                    // Calculate power with fluctuation
+                    const actualPower = workload.basePower * targetRack.powerFluctuation;
+
+                    // Check if rack and row can handle the power
+                    const newRackPower = targetRack.currentPower + actualPower;
+                    const newRowPower = targetRow.currentPower + actualPower;
+
+                    // Check capacity limits (5 workloads per rack, 5MW power limit)
+                    if (targetRack.workloads.length < 5 && newRackPower <= 5.0 && newRowPower <= targetRow.maxPower) {
+                        // Add workload state tracking
+                        const workloadInstance = {
+                            ...workload,
+                            isOn: true, // Workloads start in "on" state
+                            startupCycle: this.powerCycle, // Track when it was turned on
+                            cyclesSinceStartup: 0
+                        };
+
+                        targetRack.workloads.push(workloadInstance);
+                        this.updateRackPower(targetRack);
+
+                        // Start the timer on first workload placement
+                        if (!this.timerStarted) {
+                            this.timerStarted = true;
+                            this.addAlert(`⏱️ Timer started! You have 5 minutes to maximize profit.`);
+                        }
+
+                        if (sourceRack) {
+                            this.updateRackVisual(sourceRack);
+                            this.updatePowerRowVisual(this.powerRows[sourceRack.rowId]);
+                        }
+                        this.updateRackVisual(targetRack);
+                        this.updatePowerRowVisual(targetRow);
+                        this.updateWorkloadPool();
+                        this.addAlert(`✅ Moved ${workload.name} to Rack ${targetRackId + 1}`);
+                    } else {
+                        // Return to original position
+                        if (sourceRack) {
+                            sourceRack.workloads.push(workload);
+                            this.updateRackPower(sourceRack);
+                        } else {
+                            this.workloadPool.push(workload);
+                        }
+
+                        if (targetRack.workloads.length >= 5) {
+                            this.addAlert(`❌ Rack ${targetRackId + 1} is full (max 5 workloads)`);
+                        } else if (newRowPower > targetRow.maxPower) {
+                            this.addAlert(`❌ Row ${targetRow.id + 1} power limit exceeded (${targetRow.maxPower}MW)`);
+                        } else {
+                            this.addAlert(`❌ Rack ${targetRackId + 1} power limit exceeded (5.0MW)`);
+                        }
+                    }
+                }
+            }
+
+            updateRackPower(rack) {
+                rack.basePower = 0;
+                rack.workloads.forEach(workload => {
+                    if (workload.isOn) {
+                        // Use startup power if recently turned on, otherwise use pattern
+                        if (workload.cyclesSinceStartup < 3) {
+                            rack.basePower += workload.startupPower;
+                        } else {
+                            // Use power pattern based on current cycle
+                            const patternPower = workload.powerPattern[this.powerCycle];
+                            rack.basePower += patternPower;
+                        }
+                    }
+                });
+                rack.currentPower = rack.basePower;
+            }
+
+            returnWorkloadToPool(workloadId) {
+                for (let rack of this.racks) {
+                    const workloadIndex = rack.workloads.findIndex((_, index) => `${rack.id}-${index}` === workloadId);
+                    if (workloadIndex !== -1) {
+                        const workload = rack.workloads[workloadIndex];
+                        rack.workloads.splice(workloadIndex, 1);
+                        this.updateRackPower(rack);
+
+                        workload.id = `pool-${Date.now()}`;
+                        this.workloadPool.push(workload);
+
+                        this.updateRackVisual(rack);
+                        this.updatePowerRowVisual(this.powerRows[rack.rowId]);
+                        this.updateWorkloadPool();
+                        this.addAlert(`🔄 Returned ${workload.name} to pool`);
+                        break;
+                    }
+                }
+            }
+
+            calculateDowntime() {
+                // Track downtime for all racks that are down (failed, breaker tripped, or row breaker tripped)
+                this.racks.forEach(rack => {
+                    const row = this.powerRows[rack.rowId];
+
+                    // Rack is down if: failed, rack breaker tripped, or row breaker tripped
+                    if (rack.isFailed || rack.breakerTripped || row.breakerTripped) {
+                        rack.downtime++;
+                        this.totalDowntime++;
+                    }
+                });
+            }
+
+            simulateFailures() {
+                this.racks.forEach(rack => {
+                    if (rack.isFailed) {
+                        return;
+                    }
+
+                    // Failure probability increases with higher power usage and time
+                    let failureProbability = 0.001; // Base 0.1% per second
+                    if (rack.currentPower > 3.0) failureProbability *= 3;
+                    if (rack.workloads.length > 1) failureProbability *= 2;
+
+                    // If we have Verdigris, use predictive maintenance workflow
+                    if (this.hasVerdigris) {
+                        // If no warning yet, check if we should issue one
+                        if (rack.failureWarning === 0 && Math.random() < failureProbability * 10) {
+                            rack.failureWarning = Math.floor(30 + Math.random() * 61); // 30-90 second warning (integer)
+                            this.addAlert(`⚠️ Verdigris Warning: Rack ${rack.id + 1} may fail soon!`);
+                        }
+
+                        // Countdown warning time
+                        if (rack.failureWarning > 0) {
+                            rack.failureWarning--;
+
+                            // Only fail when countdown reaches 0
+                            if (rack.failureWarning <= 0) {
+                                rack.isFailed = true;
+                                rack.currentPower = 0;
+                                rack.failureWarning = 0;
+                                this.addAlert(`💀 FAILURE: Rack ${rack.id + 1} has failed! Revenue lost.`);
+
+                                // Move workloads back to pool
+                                rack.workloads.forEach(workload => {
+                                    workload.id = `pool-${Date.now()}-${Math.random()}`;
+                                    this.workloadPool.push(workload);
+                                });
+                                rack.workloads = [];
+                                this.updateWorkloadPool();
+                            }
+                        }
+                    } else {
+                        // Without Verdigris, failures happen immediately without warning
+                        if (Math.random() < failureProbability) {
+                            rack.isFailed = true;
+                            rack.currentPower = 0;
+                            this.addAlert(`💀 FAILURE: Rack ${rack.id + 1} has failed! Revenue lost.`);
+
+                            // Move workloads back to pool
+                            rack.workloads.forEach(workload => {
+                                workload.id = `pool-${Date.now()}-${Math.random()}`;
+                                this.workloadPool.push(workload);
+                            });
+                            rack.workloads = [];
+                            this.updateWorkloadPool();
+                        }
+                    }
+                });
+            }
+
+            simulatePowerFluctuations() {
+                this.racks.forEach(rack => {
+                    // Power fluctuates 0-100% randomly for dramatic variation
+                    const fluctuation = Math.random();
+                    rack.powerFluctuation = fluctuation;
+                    this.updateRackPower(rack);
+                });
+            }
+
+            toggleWorkload(rackId, workloadIndex) {
+                const rack = this.racks[rackId];
+                const workload = rack.workloads[workloadIndex];
+
+                if (workload) {
+                    workload.isOn = !workload.isOn;
+                    if (workload.isOn) {
+                        workload.startupCycle = this.powerCycle;
+                        workload.cyclesSinceStartup = 0;
+                        this.addAlert(`🔋 ${workload.name} in Rack ${rackId + 1} turned ON`);
+                    } else {
+                        this.addAlert(`⚫ ${workload.name} in Rack ${rackId + 1} turned OFF`);
+                    }
+
+                    this.updateRackPower(rack);
+                    this.updateRackVisual(rack);
+                    this.updatePowerRowVisual(this.powerRows[rack.rowId]);
+                    this.checkBreakerTrips();
+                }
+            }
+
+            checkBreakerTrips() {
+                // Check rack-level breaker trips
+                const rackMaxPower = this.getRackMaxPower();
+                this.racks.forEach(rack => {
+                    if (!rack.breakerTripped && rack.currentPower > rackMaxPower) {
+                        rack.breakerTripped = true;
+                        this.addAlert(`🚨 RACK BREAKER TRIP: Rack ${rack.id + 1} exceeded ${rackMaxPower.toFixed(1)}MW limit!`);
+                        // Turn off all workloads
+                        rack.workloads.forEach(workload => workload.isOn = false);
+                        this.updateRackPower(rack);
+                        this.updateRackVisual(rack);
+                    }
+                });
+
+                // Check row-level breaker trips
+                this.powerRows.forEach(row => {
+                    if (!row.breakerTripped && row.currentPower > row.maxPower) {
+                        row.breakerTripped = true;
+                        this.addAlert(`🚨 ROW BREAKER TRIP: Row ${row.id + 1} exceeded ${row.maxPower}MW limit!`);
+                        // Turn off all workloads in the row
+                        row.racks.forEach(rack => {
+                            rack.workloads.forEach(workload => workload.isOn = false);
+                            this.updateRackPower(rack);
+                            this.updateRackVisual(rack);
+                        });
+                        this.updatePowerRowVisual(row);
+                    }
+                });
+            }
+
+            resetRackBreaker(rackId) {
+                const rack = this.racks[rackId];
+
+                // Calculate startup power for all "on" workloads
+                let startupPower = 0;
+                rack.workloads.forEach(workload => {
+                    if (workload.isOn) {
+                        startupPower += workload.startupPower;
+                    }
+                });
+
+                const rackMaxPower = this.getRackMaxPower();
+                if (startupPower > rackMaxPower) {
+                    this.addAlert(`❌ Cannot reset: Startup power ${startupPower.toFixed(1)}MW exceeds rack limit ${rackMaxPower.toFixed(1)}MW`);
+                    return;
+                }
+
+                // Check row startup capacity
+                const row = this.powerRows[rack.rowId];
+                let rowStartupPower = 0;
+                row.racks.forEach(r => {
+                    if (r.id === rackId) {
+                        rowStartupPower += startupPower;
+                    } else if (!r.breakerTripped) {
+                        rowStartupPower += r.currentPower;
+                    }
+                });
+
+                if (rowStartupPower > row.maxPower) {
+                    this.addAlert(`❌ Cannot reset: Row startup power ${rowStartupPower.toFixed(1)}MW exceeds limit ${row.maxPower}MW`);
+                    return;
+                }
+
+                rack.breakerTripped = false;
+                // Reset startup cycles for all workloads
+                rack.workloads.forEach(workload => {
+                    if (workload.isOn) {
+                        workload.startupCycle = this.powerCycle;
+                        workload.cyclesSinceStartup = 0;
+                    }
+                });
+
+                this.addAlert(`✅ Rack ${rackId + 1} breaker reset successfully`);
+                this.updateRackPower(rack);
+                this.updateRackVisual(rack);
+                this.updatePowerRowVisual(row);
+            }
+
+            drawPowerGraph(rowId) {
+                const canvas = document.getElementById(`graph-${rowId}`);
+                if (!canvas) return;
+
+                // Set canvas size to match CSS
+                canvas.width = 300;
+                canvas.height = 122;
+
+                const ctx = canvas.getContext('2d');
+                const row = this.powerRows[rowId];
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw grid with softer styling
+                ctx.lineWidth = 0.5;
+                ctx.setLineDash([2, 3]);
+
+                // Vertical grid lines (cyan tint)
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.08)';
+                for (let i = 0; i <= 10; i++) {
+                    const x = (i / 10) * canvas.width;
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+
+                // Horizontal grid lines (steel blue tint, fewer lines)
+                ctx.strokeStyle = 'rgba(120, 180, 255, 0.05)';
+                for (let i = 0; i <= 4; i++) {
+                    const y = (i / 4) * canvas.height;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+
+                ctx.setLineDash([]);
+
+                // Graph scales with actual row capacity + 5MW headroom
+                const graphMax = row.maxPower + 5;
+
+                // Draw power limit line (red line floats at actual row capacity)
+                ctx.strokeStyle = '#ff3030';
+                ctx.lineWidth = 2;
+                const limitY = canvas.height - (row.maxPower / graphMax) * canvas.height;
+                ctx.beginPath();
+                ctx.moveTo(0, limitY);
+                ctx.lineTo(canvas.width, limitY);
+                ctx.stroke();
+
+                // Draw row power history
+                ctx.strokeStyle = this.hasVerdigris ? '#00ff88' : '#666';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const x = (i / 9) * canvas.width;
+                    const power = row.powerHistory[i] || 0;
+                    const y = canvas.height - (power / graphMax) * canvas.height;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+
+                // Highlight current cycle
+                const currentX = (this.powerCycle / 9) * canvas.width;
+                ctx.fillStyle = this.hasVerdigris ? '#ffaa00' : '#666';
+                ctx.beginPath();
+                ctx.arc(currentX, canvas.height - (row.currentPower / graphMax) * canvas.height, 6, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Only draw individual workload patterns if Verdigris is enabled
+                if (this.hasVerdigris) {
+                    this.drawWorkloadPatterns(rowId, ctx, canvas, graphMax);
+                }
+            }
+
+            drawWorkloadPatterns(rowId, ctx, canvas, graphMax) {
+                const row = this.powerRows[rowId];
+
+                // Collect all workloads in the row
+                const workloadsInRow = [];
+                row.racks.forEach(rack => {
+                    rack.workloads.forEach(workload => {
+                        if (workload.isOn) {
+                            workloadsInRow.push(workload);
+                        }
+                    });
+                });
+
+                if (workloadsInRow.length === 0) return;
+
+                // Draw stacked area chart - each workload gets its own colored band
+                // Stack from bottom to top
+                for (let w = 0; w < workloadsInRow.length; w++) {
+                    const workload = workloadsInRow[w];
+
+                    ctx.beginPath();
+
+                    // Calculate cumulative power for this workload and all below it
+                    for (let i = 0; i < 10; i++) {
+                        const x = (i / 9) * canvas.width;
+
+                        // Sum power of all workloads below this one (cumulative)
+                        let cumulativePower = 0;
+                        for (let j = 0; j <= w; j++) {
+                            cumulativePower += workloadsInRow[j].powerPattern[i];
+                        }
+
+                        const y = canvas.height - (cumulativePower / graphMax) * canvas.height;
+
+                        if (i === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+
+                    // Draw back along the bottom edge of this layer
+                    for (let i = 9; i >= 0; i--) {
+                        const x = (i / 9) * canvas.width;
+
+                        // Sum power of all workloads below this one (w-1)
+                        let cumulativePower = 0;
+                        for (let j = 0; j < w; j++) {
+                            cumulativePower += workloadsInRow[j].powerPattern[i];
+                        }
+
+                        const y = canvas.height - (cumulativePower / graphMax) * canvas.height;
+                        ctx.lineTo(x, y);
+                    }
+
+                    ctx.closePath();
+
+                    // Fill with workload color (semi-transparent)
+                    const color = workload.color;
+                    ctx.fillStyle = color.replace(')', ', 0.6)').replace('rgb', 'rgba').replace('#', 'rgba(');
+                    // Convert hex to rgba if needed
+                    if (color.startsWith('#')) {
+                        const r = parseInt(color.substr(1, 2), 16);
+                        const g = parseInt(color.substr(3, 2), 16);
+                        const b = parseInt(color.substr(5, 2), 16);
+                        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.7)`;
+                    } else {
+                        ctx.fillStyle = color.replace(')', ', 0.7)').replace('rgb', 'rgba');
+                    }
+                    ctx.fill();
+
+                    // Optional: draw a thin border on top edge for clarity
+                    ctx.strokeStyle = workload.color;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    for (let i = 0; i < 10; i++) {
+                        const x = (i / 9) * canvas.width;
+                        let cumulativePower = 0;
+                        for (let j = 0; j <= w; j++) {
+                            cumulativePower += workloadsInRow[j].powerPattern[i];
+                        }
+                        const y = canvas.height - (cumulativePower / graphMax) * canvas.height;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+            }
+
+            detectPatternConflicts(rack) {
+                if (!this.hasVerdigris || rack.workloads.length < 2) return [];
+
+                const conflicts = [];
+                const workloads = rack.workloads.filter(w => w.isOn);
+
+                // Check for cycles where multiple workloads spike together
+                for (let cycle = 0; cycle < 10; cycle++) {
+                    let totalPower = 0;
+                    let highPowerWorkloads = [];
+
+                    workloads.forEach(workload => {
+                        const power = workload.powerPattern[cycle];
+                        totalPower += power;
+                        if (power > workload.basePower * 1.2) { // 20% above base
+                            highPowerWorkloads.push(workload.name);
+                        }
+                    });
+
+                    if (totalPower > 4.5 && highPowerWorkloads.length > 1) {
+                        conflicts.push({
+                            cycle: cycle,
+                            power: totalPower,
+                            workloads: highPowerWorkloads
+                        });
+                    }
+                }
+
+                return conflicts;
+            }
+
+            suggestOptimalPairings(workload) {
+                if (!this.hasVerdigris) return [];
+
+                const suggestions = [];
+
+                // Find workloads with complementary patterns
+                this.workloadTypes.forEach(otherWorkload => {
+                    if (otherWorkload.name === workload.name) return;
+
+                    let conflictScore = 0;
+                    let synergScore = 0;
+
+                    for (let cycle = 0; cycle < 10; cycle++) {
+                        const power1 = workload.powerPattern[cycle];
+                        const power2 = otherWorkload.powerPattern[cycle];
+
+                        // Check if both spike at same time (bad)
+                        if (power1 > workload.basePower * 1.2 && power2 > otherWorkload.basePower * 1.2) {
+                            conflictScore += 2;
+                        }
+
+                        // Check if one is low when other is high (good)
+                        if ((power1 > workload.basePower * 1.2 && power2 < otherWorkload.basePower * 0.8) ||
+                            (power2 > otherWorkload.basePower * 1.2 && power1 < workload.basePower * 0.8)) {
+                            synergScore += 1;
+                        }
+                    }
+
+                    if (synergScore > conflictScore && synergScore > 3) {
+                        suggestions.push({
+                            workload: otherWorkload.name,
+                            score: synergScore - conflictScore
+                        });
+                    }
+                });
+
+                return suggestions.sort((a, b) => b.score - a.score).slice(0, 2);
+            }
+
+            calculateMetrics() {
+                let totalRevenue = 0;
+                let totalPowerUsed = 0;
+                let operationalRacks = 0;
+                let failedRacks = 0;
+
+                this.racks.forEach(rack => {
+                    if (rack.isFailed) {
+                        failedRacks++;
+                        return;
+                    }
+
+                    if (rack.workloads.length > 0) {
+                        operationalRacks++;
+                    }
+
+                    // Only count revenue from workloads that are on and not in tripped breakers
+                    if (!rack.breakerTripped && !this.powerRows[rack.rowId].breakerTripped) {
+                        rack.workloads.forEach(workload => {
+                            if (workload.isOn) {
+                                totalRevenue += workload.revenue;
+                            }
+                        });
+                    }
+
+                    totalPowerUsed += rack.currentPower;
+                });
+
+                // Calculate stranded capacity
+                this.strandedCapacity = 0;
+                if (this.hasVerdigris) {
+                    this.strandedCapacity = this.racks.filter(r => r.isStranded && r.workloads.length === 0 && !r.isFailed).length * 2.0;
+                } else {
+                    // Without Verdigris, you can't see stranded capacity clearly
+                    this.strandedCapacity = this.racks.filter(r => r.workloads.length === 0 && !r.isFailed).length * 0.5;
+                }
+
+                // Power costs
+                const totalPowerCost = totalPowerUsed * 3; // $3 per MW per minute
+
+                this.revenue = totalRevenue;
+                this.powerCost = totalPowerCost;
+                this.efficiency = operationalRacks > 0 ? Math.min(100, (operationalRacks / (operationalRacks + failedRacks)) * 100) : 0;
+
+                // Update profit
+                const netPerMinute = this.revenue - this.powerCost;
+                this.totalProfit += netPerMinute / 60;
+
+                return { failedRacks, operationalRacks };
+            }
+
+            getRackMaxPower() {
+                return 5.0 + (this.rackCapacityUpgrades * 0.25);
+            }
+
+            getRowMaxPower() {
+                // Row capacity is independent of rack capacity
+                return 15.0 + (this.rowCapacityUpgrades * 1.5);
+            }
+
+            upgradeRackCapacity() {
+                const upgradeCost = 5000;
+                if (this.totalProfit >= upgradeCost) {
+                    this.totalProfit -= upgradeCost;
+                    this.rackCapacityUpgrades++;
+
+                    const newRackMax = this.getRackMaxPower();
+
+                    // Update capacity display
+                    document.getElementById('rackCapacityLevel').textContent = `Rack Capacity: ${newRackMax.toFixed(2)} MW`;
+
+                    this.addAlert(`⚡ Upgraded rack capacity to ${newRackMax.toFixed(2)} MW per rack!`);
+                    this.addAlert(`💡 Each rack can now hold more powerful workloads!`);
+
+                    // Update all rack visuals to reflect new capacity
+                    this.racks.forEach(rack => this.updateRackVisual(rack));
+                }
+            }
+
+            upgradeRowCapacity() {
+                const upgradeCost = 5000;
+                if (this.totalProfit >= upgradeCost) {
+                    this.totalProfit -= upgradeCost;
+                    this.rowCapacityUpgrades++;
+
+                    const newRowMax = this.getRowMaxPower();
+
+                    // Update all row max powers
+                    this.powerRows.forEach(row => {
+                        row.maxPower = newRowMax;
+                        const text = document.getElementById(`row-power-text-${row.id}`);
+                        if (text && this.hasVerdigris) {
+                            text.textContent = `${row.currentPower.toFixed(1)}/${row.maxPower.toFixed(1)} MW`;
+                        }
+                    });
+
+                    // Update capacity display
+                    document.getElementById('rowCapacityLevel').textContent = `Row Capacity: ${newRowMax.toFixed(1)} MW`;
+
+                    this.addAlert(`⚡ Upgraded row capacity to ${newRowMax.toFixed(1)} MW per row!`);
+                    this.addAlert(`💡 Can now fit more total workloads per row!`);
+                }
+            }
+
+            upgradeMonitoring() {
+                if (this.totalProfit >= 15000 && !this.hasVerdigris) {
+                    this.totalProfit -= 15000;
+                    this.hasVerdigris = true;
+
+                    document.getElementById('monitoringType').textContent = 'Verdigris AI Monitoring';
+                    document.getElementById('upgradeMonitoring').style.display = 'none';
+                    document.getElementById('discoverBtn').disabled = false;
+                    document.getElementById('predictiveBtn').disabled = false;
+                    document.getElementById('autoOptimizeBtn').disabled = false;
+
+                    // Update graph info
+                    const graphInfo = document.getElementById('graphInfo');
+                    if (graphInfo) {
+                        graphInfo.textContent = '📊 Power Trend: 10 cycles - Individual Patterns Visible';
+                    }
+
+                    // Dramatic reveal of power meters
+                    this.racks.forEach(rack => {
+                        const meter = document.getElementById(`meter-${rack.id}`);
+                        if (meter) {
+                            meter.classList.add('visible');
+                        }
+                    });
+
+                    this.powerRows.forEach(row => {
+                        const meter = document.getElementById(`row-meter-${row.id}`);
+                        const text = document.getElementById(`row-power-text-${row.id}`);
+                        if (meter) meter.classList.add('visible');
+                        if (text) text.textContent = `${row.currentPower.toFixed(1)}/${row.maxPower.toFixed(1)} MW`;
+                    });
+
+                    this.addAlert('🚀 Upgraded to Verdigris AI! Unlocked predictive analytics');
+                    this.addAlert('💡 Now receiving failure warnings 30-90s in advance');
+                    this.addAlert('🔍 Real-time power visibility now enabled!');
+                    this.addAlert('⚡ Power meters revealed - see your true consumption');
+                    this.addAlert('📊 Power trend graphs now show individual workload patterns!');
+                    this.addAlert('🎯 Hover over workloads to see their power patterns');
+
+                    // Redraw all graphs with workload patterns
+                    this.powerRows.forEach(row => {
+                        this.drawPowerGraph(row.id);
+                    });
+
+                    // Update visuals
+                    this.racks.forEach(rack => this.updateRackVisual(rack));
+                }
+            }
+
+            discoverStrandedCapacity() {
+                if (!this.hasVerdigris) return;
+
+                let discovered = 0;
+                this.racks.forEach(rack => {
+                    if (rack.isStranded && rack.workloads.length === 0 && !rack.isFailed) {
+                        rack.isStranded = false;
+                        discovered++;
+                    }
+                });
+
+                if (discovered > 0) {
+                    this.addAlert(`🔍 Discovered ${discovered} racks with stranded capacity!`);
+                    this.addAlert(`💰 Unlocked ${discovered * 2.0} MW of hidden power`);
+                } else {
+                    this.addAlert(`✅ No stranded capacity found`);
+                }
+
+                this.racks.forEach(rack => this.updateRackVisual(rack));
+            }
+
+            predictiveMaintenance() {
+                if (!this.hasVerdigris) return;
+
+                let prevented = 0;
+                this.racks.forEach(rack => {
+                    // Clear any active warning to prevent failure
+                    // Note: We check > 0 because warnings at 0 have already triggered failure
+                    if (rack.failureWarning > 0) {
+                        rack.failureWarning = 0;
+                        prevented++;
+                    }
+                });
+
+                if (prevented > 0) {
+                    this.addAlert(`🔮 Prevented ${prevented} predicted failures!`);
+                    this.addAlert(`💰 Saved potential downtime and repair costs`);
+                    this.totalProfit += prevented * 1000; // Bonus for preventing failures
+                } else {
+                    this.addAlert(`✅ No imminent failures detected`);
+                }
+            }
+
+            toggleAutoOptimize() {
+                if (!this.hasVerdigris) return;
+
+                this.autoOptimizeActive = !this.autoOptimizeActive;
+                const btn = document.getElementById('autoOptimizeBtn');
+
+                if (this.autoOptimizeActive) {
+                    btn.classList.add('auto-optimize-toggle');
+                    btn.innerHTML = '⚡ Auto-Optimize: ON<br><small>Drag workloads to see safe placements</small>';
+                    this.addAlert('⚡ Auto-optimize helper activated - drag workloads to see pattern-safe placements');
+                } else {
+                    btn.classList.remove('auto-optimize-toggle');
+                    btn.innerHTML = '⚡ Auto-Optimize Helper<br><small>Show pattern-safe placements</small>';
+                    this.addAlert('⚡ Auto-optimize helper deactivated');
+                    this.clearOptimalHighlights();
+                }
+            }
+
+            highlightOptimalPlacements() {
+                if (!this.autoOptimizeActive) {
+                    console.log('❌ Auto-optimize not active');
+                    return;
+                }
+
+                // Clear previous highlights
+                this.clearOptimalHighlights();
+
+                // Only highlight if we know what workload is being dragged
+                if (!this.draggedWorkloadType) {
+                    console.log('❌ No draggedWorkloadType');
+                    return;
+                }
+
+                console.log('✅ Analyzing placements for:', this.draggedWorkloadType.name);
+
+                const workloadType = this.draggedWorkloadType;
+
+                // Score each rack based on multiple factors
+                const scoredRacks = this.racks
+                    .filter(rack => !rack.isFailed)
+                    .map(rack => {
+                        const isDraggedFromThisRack = (this.draggedFromRackId === rack.id);
+
+                        // Pre-compute rack power excluding the dragged workload
+                        let currentRackBasePower = 0;
+                        let activeWorkloadCount = 0;
+                        rack.workloads.forEach((w, idx) => {
+                            if (!(isDraggedFromThisRack && idx === this.draggedFromIndex)) {
+                                if (w.isOn) {
+                                    currentRackBasePower += w.basePower;
+                                    activeWorkloadCount++;
+                                }
+                            }
+                        });
+
+                        // Pre-compute row power excluding the dragged workload
+                        const row = this.powerRows[rack.rowId];
+                        let currentRowPower = row.currentPower;
+                        if (this.draggedFromRackId !== null) {
+                            const sourceRack = this.racks.find(r => r.id === this.draggedFromRackId);
+                            if (sourceRack && sourceRack.rowId === rack.rowId) {
+                                currentRowPower -= workloadType.basePower;
+                            }
+                        }
+
+                        // Check capacity constraints
+                        const effectiveWorkloadCount = isDraggedFromThisRack ? rack.workloads.length : rack.workloads.length + 1;
+                        const projectedRackPower = currentRackBasePower + workloadType.basePower;
+                        const projectedRowPower = currentRowPower + workloadType.basePower;
+                        const rackMaxPower = this.getRackMaxPower();
+
+                        // Disqualify if basic constraints violated
+                        if (effectiveWorkloadCount > 5 || projectedRackPower > rackMaxPower || projectedRowPower > row.maxPower) {
+                            return { rack, score: -1000, disqualified: true };
+                        }
+
+                        // For Verdigris users: Check row pattern spikes across all racks in the row
+                        if (this.hasVerdigris) {
+                            for (let cycle = 0; cycle < 10; cycle++) {
+                                let rowCyclePower = 0;
+
+                                // Sum power from all racks in this row for this cycle
+                                this.racks.forEach(r => {
+                                    if (r.rowId === rack.rowId) {
+                                        r.workloads.forEach((w, idx) => {
+                                            // Skip the dragged workload if it's in this row
+                                            if (w.isOn && !(this.draggedFromRackId === r.id && idx === this.draggedFromIndex)) {
+                                                // Calculate how many startup cycles remain for this workload
+                                                const futureCyclesSinceStartup = w.cyclesSinceStartup + cycle;
+
+                                                // Use startup power only if still within first 3 cycles
+                                                if (futureCyclesSinceStartup < 3) {
+                                                    rowCyclePower += w.startupPower;
+                                                } else {
+                                                    rowCyclePower += w.powerPattern[cycle];
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
+                                // Add the new workload's power (use startup power for first 3 cycles)
+                                if (cycle < 3) {
+                                    rowCyclePower += workloadType.startupPower;
+                                } else {
+                                    rowCyclePower += workloadType.powerPattern[cycle];
+                                }
+
+                                // Disqualify if any cycle would exceed row capacity
+                                if (rowCyclePower > row.maxPower) {
+                                    return { rack, score: -1000, disqualified: true };
+                                }
+                            }
+                        }
+
+                        let score = 100;
+
+                        // Factor 1: Utilization preference (prefer 20-80% utilization)
+                        const util = currentRackBasePower / rackMaxPower;
+                        if (util > 0.2 && util < 0.8) {
+                            score += 30;
+                        } else if (util === 0) {
+                            score -= 10; // Slight penalty for empty racks
+                        }
+
+                        // Factor 2: Pattern conflict detection (CRITICAL)
+                        if (this.hasVerdigris) {
+                            // Check if adding this workload would cause pattern conflicts
+                            let maxCombinedPower = 0;
+                            let conflictCycles = 0;
+
+                            for (let cycle = 0; cycle < 10; cycle++) {
+                                let totalPower = 0;
+
+                                // Add power from existing workloads (excluding the dragged one if it's from this rack)
+                                rack.workloads.forEach((w, idx) => {
+                                    if (w.isOn && !(isDraggedFromThisRack && idx === this.draggedFromIndex)) {
+                                        // Calculate how many startup cycles remain for this workload
+                                        const futureCyclesSinceStartup = w.cyclesSinceStartup + cycle;
+
+                                        // Use startup power only if still within first 3 cycles
+                                        if (futureCyclesSinceStartup < 3) {
+                                            totalPower += w.startupPower;
+                                        } else {
+                                            totalPower += w.powerPattern[cycle];
+                                        }
+                                    }
+                                });
+
+                                // Add the workload being placed (use startup power for first 3 cycles)
+                                if (cycle < 3) {
+                                    totalPower += workloadType.startupPower;
+                                } else {
+                                    totalPower += workloadType.powerPattern[cycle];
+                                }
+
+                                if (totalPower > maxCombinedPower) {
+                                    maxCombinedPower = totalPower;
+                                }
+
+                                // Penalize if combined power gets dangerous (using dynamic thresholds)
+                                if (totalPower > rackMaxPower * 0.9) {
+                                    conflictCycles++;
+                                    score -= 40; // Heavy penalty per conflict cycle
+                                } else if (totalPower > rackMaxPower * 0.8) {
+                                    score -= 15; // Moderate penalty for getting close
+                                }
+                            }
+
+                            // If any cycle would exceed rack capacity, disqualify this rack
+                            if (maxCombinedPower > rackMaxPower) {
+                                score = -1000; // Disqualify
+                            }
+
+                            // Bonus for complementary patterns (peaks fill valleys)
+                            let synergyScore = 0;
+                            rack.workloads.forEach((w, idx) => {
+                                // Skip the dragged workload if it's already in this rack
+                                if (!w.isOn || (isDraggedFromThisRack && idx === this.draggedFromIndex)) return;
+
+                                for (let cycle = 0; cycle < 10; cycle++) {
+                                    const existingPower = w.powerPattern[cycle];
+                                    const newPower = workloadType.powerPattern[cycle];
+
+                                    // Good synergy: one is low when other is high
+                                    if ((existingPower < w.basePower * 0.8 && newPower > workloadType.basePower * 1.2) ||
+                                        (newPower < workloadType.basePower * 0.8 && existingPower > w.basePower * 1.2)) {
+                                        synergyScore += 2;
+                                    }
+                                }
+                            });
+                            score += synergyScore;
+                        }
+
+                        // Factor 3: Row power headroom (using pre-computed currentRowPower)
+                        const rowHeadroom = row.maxPower - projectedRowPower;
+                        if (rowHeadroom > 5) {
+                            score += 10; // Good headroom
+                        }
+
+                        return { rack, score };
+                    })
+                    .filter(item => !item.disqualified && item.score > 0) // Remove disqualified racks
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 3); // Highlight top 3 options
+
+                // Highlight the best racks
+                console.log('🟢 Highlighting', scoredRacks.length, 'optimal racks');
+                scoredRacks.forEach(item => {
+                    const rackElement = document.getElementById(`rack-${item.rack.id}`);
+                    if (rackElement) {
+                        rackElement.classList.add('optimal-placement');
+                        console.log('  ✅ Highlighted rack', item.rack.id, 'with score', item.score);
+                    } else {
+                        console.log('  ❌ Could not find element for rack', item.rack.id);
+                    }
+
+                    const rowElement = document.getElementById(`row-${item.rack.rowId}`);
+                    if (rowElement) {
+                        rowElement.classList.add('optimal-row');
+                    }
+                });
+            }
+
+            clearOptimalHighlights() {
+                this.racks.forEach(rack => {
+                    const rackElement = document.getElementById(`rack-${rack.id}`);
+                    if (rackElement) {
+                        rackElement.classList.remove('optimal-placement');
+                    }
+                });
+
+                this.powerRows.forEach(row => {
+                    const rowElement = document.getElementById(`row-${row.id}`);
+                    if (rowElement) {
+                        rowElement.classList.remove('optimal-row');
+                    }
+                });
+            }
+
+            addAlert(message) {
+                this.alerts.unshift(message);
+                if (this.alerts.length > 8) {
+                    this.alerts.pop();
+                }
+                this.updateAlertsDisplay();
+            }
+
+            updateAlertsDisplay() {
+                const alertsPanel = document.getElementById('alertsPanel');
+                if (this.alerts.length > 0) {
+                    alertsPanel.innerHTML = '<strong>System Alerts:</strong><br>' +
+                        this.alerts.map(alert => `<div class="alert">${alert}</div>`).join('');
+                } else {
+                    alertsPanel.innerHTML = '<strong>System Alerts:</strong><br><div class="alert">🟢 All systems operational</div>';
+                }
+            }
+
+            updateUI() {
+                const metrics = this.calculateMetrics();
+
+                document.getElementById('totalProfit').textContent = Math.round(this.totalProfit);
+                document.getElementById('revenue').textContent = Math.round(this.revenue);
+                document.getElementById('powerCost').textContent = Math.round(this.powerCost);
+                document.getElementById('efficiency').textContent = Math.round(this.efficiency);
+                document.getElementById('strandedCapacity').textContent = this.strandedCapacity.toFixed(1);
+                document.getElementById('failedRacks').textContent = metrics.failedRacks;
+                document.getElementById('totalDowntime').textContent = this.totalDowntime;
+
+                // Calculate uptime percentage
+                const maxPossibleUptime = this.racks.length * (300 - this.gameTime); // Total possible rack-seconds
+                const actualUptime = maxPossibleUptime - this.totalDowntime;
+                const uptimePercentage = maxPossibleUptime > 0 ? (actualUptime / maxPossibleUptime) * 100 : 100;
+                document.getElementById('uptime').textContent = uptimePercentage.toFixed(1) + '%';
+
+                // Update timer
+                const minutes = Math.floor(this.gameTime / 60);
+                const seconds = this.gameTime % 60;
+                document.getElementById('gameTimer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                // Update upgrade buttons
+                const upgradeMonitoringBtn = document.getElementById('upgradeMonitoring');
+                if (upgradeMonitoringBtn) {
+                    upgradeMonitoringBtn.disabled = this.totalProfit < 15000 || this.hasVerdigris;
+                }
+
+                const upgradeRackBtn = document.getElementById('upgradeRackCapacity');
+                if (upgradeRackBtn) {
+                    upgradeRackBtn.disabled = this.totalProfit < 5000;
+                }
+
+                const upgradeRowBtn = document.getElementById('upgradeRowCapacity');
+                if (upgradeRowBtn) {
+                    upgradeRowBtn.disabled = this.totalProfit < 5000;
+                }
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+
+                const maxPossibleUptime = this.racks.length * 300;
+                const actualUptime = maxPossibleUptime - this.totalDowntime;
+                const uptimePercentage = (actualUptime / maxPossibleUptime) * 100;
+
+                let results = `Revenue/min: $${Math.round(this.revenue)}<br>`;
+                results += `Power Cost/min: $${Math.round(this.powerCost)}<br>`;
+                results += `Uptime: ${uptimePercentage.toFixed(1)}%<br>`;
+                results += `Total Downtime: ${this.totalDowntime}s<br>`;
+                results += `Stranded Capacity: ${this.strandedCapacity.toFixed(1)} MW<br><br>`;
+
+                if (this.hasVerdigris) {
+                    results += `✅ Successfully used Verdigris predictive analytics<br>`;
+                    results += `📊 Had real-time power visibility and failure warnings<br>`;
+                } else {
+                    results += `❌ Operated without Verdigris - flying blind on power consumption<br>`;
+                    results += `⚠️ Could have prevented failures with predictive analytics<br>`;
+                }
+
+                if (this.totalProfit > 30000) {
+                    results += `🏆 Excellent! Master data center operator!`;
+                } else if (this.totalProfit > 15000) {
+                    results += `👍 Good job! ${this.hasVerdigris ? 'Verdigris helped maximize performance.' : 'Try Verdigris next time for better results.'}`;
+                } else {
+                    results += `📈 Consider Verdigris for predictive failure prevention and power visibility.`;
+                }
+
+                document.getElementById('finalProfit').textContent = Math.round(this.totalProfit);
+                document.getElementById('gameResults').innerHTML = results;
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+            }
+
+            startGameLoop() {
+                setInterval(() => {
+                    if (this.gameRunning && this.timerStarted) {
+                        this.gameTime--;
+
+                        // Update power cycle (0-9 loop)
+                        this.powerCycle = (this.powerCycle + 1) % 10;
+
+                        // Update workload cycle counters
+                        this.racks.forEach(rack => {
+                            rack.workloads.forEach(workload => {
+                                if (workload.isOn) {
+                                    workload.cyclesSinceStartup++;
+                                }
+                            });
+                        });
+
+                        // Update all power calculations based on new cycle
+                        this.racks.forEach(rack => {
+                            this.updateRackPower(rack);
+                            this.updateRackVisual(rack);
+                        });
+
+                        this.powerRows.forEach(row => {
+                            this.updatePowerRowVisual(row);
+                        });
+
+                        // Check for breaker trips due to power pattern changes
+                        this.checkBreakerTrips();
+
+                        // Track downtime every second
+                        this.calculateDowntime();
+
+                        // Check for failures (less frequent now)
+                        if (this.gameTime % 3 === 0) {
+                            this.simulateFailures();
+                        }
+
+                        // Add new workloads occasionally
+                        if (this.gameTime % 20 === 0 && this.workloadPool.length < 20) {
+                            const workloadType = this.workloadTypes[Math.floor(Math.random() * this.workloadTypes.length)];
+                            const workload = {
+                                id: `pool-${Date.now()}`,
+                                ...workloadType
+                            };
+                            this.workloadPool.push(workload);
+                            this.updateWorkloadPool();
+                        }
+
+                        if (this.gameTime <= 0) {
+                            this.gameOver();
+                        }
+
+                        this.updateUI();
+                    }
+                }, 1000);
+            }
+        }
+
+        let game;
+
+        function showStartMenu() {
+            document.getElementById('startMenu').classList.remove('hidden');
+            document.getElementById('gameContainer').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+        }
+
+        function hideStartMenu() {
+            document.getElementById('startMenu').classList.add('hidden');
+            document.getElementById('gameContainer').classList.remove('hidden');
+        }
+
+        function startGameFromMenu() {
+            hideStartMenu();
+            document.body.classList.add('game-active');
+            // Small delay to ensure DOM is updated
+            setTimeout(() => {
+                startGame();
+            }, 50);
+        }
+
+        function returnToMenu() {
+            if (game) {
+                game.gameRunning = false;
+            }
+            document.body.classList.remove('game-active');
+            showStartMenu();
+        }
+
+        function startGame() {
+            console.log('Starting realistic datac enter simulation...');
+            // Clear any existing game state
+            if (game) {
+                game.gameRunning = false;
+            }
+
+            // Reset all UI elements to initial state
+            resetUIToInitialState();
+
+            game = new DataCenterGame();
+        }
+
+        function resetUIToInitialState() {
+            // Reset monitoring system display
+            const monitoringType = document.getElementById('monitoringType');
+            if (monitoringType) {
+                monitoringType.textContent = 'Basic Monitoring';
+            }
+
+            // Show upgrade button again
+            const upgradeBtn = document.getElementById('upgradeMonitoring');
+            if (upgradeBtn) {
+                upgradeBtn.style.display = 'block';
+            }
+
+            // Disable Verdigris features
+            const discoverBtn = document.getElementById('discoverBtn');
+            const predictiveBtn = document.getElementById('predictiveBtn');
+            const autoOptimizeBtn = document.getElementById('autoOptimizeBtn');
+
+            if (discoverBtn) discoverBtn.disabled = true;
+            if (predictiveBtn) predictiveBtn.disabled = true;
+            if (autoOptimizeBtn) {
+                autoOptimizeBtn.disabled = true;
+                autoOptimizeBtn.classList.remove('auto-optimize-toggle');
+                autoOptimizeBtn.innerHTML = '⚡ Auto-Optimize Helper<br><small>Highlight optimal placement</small>';
+            }
+
+            // Clear the datacenter area
+            const powerDistribution = document.getElementById('powerDistribution');
+            if (powerDistribution) {
+                powerDistribution.innerHTML = '';
+            }
+
+            // Clear workload pool
+            const workloadPool = document.getElementById('workloadPool');
+            if (workloadPool) {
+                workloadPool.innerHTML = '';
+            }
+
+            // Reset all stats to zero
+            const statsToReset = ['totalProfit', 'totalDowntime', 'revenue', 'powerCost', 'efficiency', 'strandedCapacity', 'failedRacks', 'uptime'];
+            statsToReset.forEach(statId => {
+                const element = document.getElementById(statId);
+                if (element) {
+                    if (statId === 'uptime' || statId === 'efficiency') {
+                        element.textContent = '100%';
+                    } else if (statId.includes('Cost') || statId.includes('revenue') || statId.includes('Profit')) {
+                        element.textContent = '$0';
+                    } else {
+                        element.textContent = '0';
+                    }
+                }
+            });
+
+            // Reset timer
+            const gameTimer = document.getElementById('gameTimer');
+            if (gameTimer) {
+                gameTimer.textContent = '5:00';
+            }
+
+            // Clear alerts
+            const alertsPanel = document.getElementById('alertsPanel');
+            if (alertsPanel) {
+                alertsPanel.innerHTML = '<strong>System Alerts:</strong><br><div class="alert">🟢 All systems operational</div>';
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            showStartMenu();
+        }
+
+        function upgradeRackCapacity() {
+            if (game && game.gameRunning) game.upgradeRackCapacity();
+        }
+
+        function upgradeRowCapacity() {
+            if (game && game.gameRunning) game.upgradeRowCapacity();
+        }
+
+        function upgradeMonitoring() {
+            if (game && game.gameRunning) game.upgradeMonitoring();
+        }
+
+        function discoverStrandedCapacity() {
+            if (game && game.gameRunning) game.discoverStrandedCapacity();
+        }
+
+        function predictiveMaintenance() {
+            if (game && game.gameRunning) game.predictiveMaintenance();
+        }
+
+        function toggleAutoOptimize() {
+            if (game && game.gameRunning) game.toggleAutoOptimize();
+        }
+
+        // Settings controls
+        function initializeSettings() {
+            const workloadSizeSlider = document.getElementById('workloadSizeSlider');
+            const workloadSizeValue = document.getElementById('workloadSizeValue');
+            const graphSizeSlider = document.getElementById('graphSizeSlider');
+            const graphSizeValue = document.getElementById('graphSizeValue');
+
+            // Text Size Control (Button-based)
+            const sizeButtons = document.querySelectorAll('.size-btn');
+            sizeButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    sizeButtons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Apply the size to the entire site by updating CSS custom property
+                    const size = this.dataset.size + 'px';
+                    document.documentElement.style.setProperty('--base-font-size', size);
+                });
+            });
+
+            // Workload Size Control
+            workloadSizeSlider.addEventListener('input', function () {
+                const size = this.value + 'px';
+                workloadSizeValue.textContent = size;
+                document.querySelectorAll('.rack').forEach(el => {
+                    el.style.height = size;
+                });
+            });
+
+            // Graph Size Control
+            graphSizeSlider.addEventListener('input', function () {
+                const size = this.value + 'px';
+                graphSizeValue.textContent = size;
+                document.querySelectorAll('.power-graph').forEach(el => {
+                    el.style.height = size;
+                });
+                // Also update canvas height
+                document.querySelectorAll('.power-graph canvas').forEach(canvas => {
+                    canvas.height = parseInt(this.value);
+                });
+                // Redraw graphs if game is running
+                if (game && game.gameRunning) {
+                    for (let i = 0; i < 3; i++) {
+                        game.drawPowerGraph(i);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, showing start menu...');
+            showStartMenu();
+            initializeSettings();
+        });
+    </script>
+</body>
+
+</html>
